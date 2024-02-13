@@ -1387,9 +1387,16 @@ class JavaCodeGeneratorTest {
 
     assertContains(
       """
-      |@ConstructorBinding
       |@ConfigurationProperties
       |public final class Mod {
+    """,
+      javaCode
+    )
+
+    assertContains(
+      """
+      |  @ConstructorBinding
+      |  public Mod(
     """,
       javaCode
     )
@@ -1400,9 +1407,16 @@ class JavaCodeGeneratorTest {
 
     assertContains(
       """
-      |  @ConstructorBinding
       |  @ConfigurationProperties("server")
       |  public static final class Server {
+    """,
+      javaCode
+    )
+
+    assertContains(
+      """
+      |    @ConstructorBinding
+      |    public Server(
     """,
       javaCode
     )

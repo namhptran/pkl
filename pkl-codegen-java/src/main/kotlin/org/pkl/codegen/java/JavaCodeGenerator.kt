@@ -246,6 +246,12 @@ class JavaCodeGenerator(
             }
           )
 
+      if (codegenOptions.generateSpringBootConfig) {
+        builder.addAnnotation(
+          ClassName.get("org.springframework.boot.context.properties", "ConstructorBinding")
+        )
+      }
+
       if (superProperties.isNotEmpty()) {
         for ((name, property) in superProperties) {
           if (properties.containsKey(name)) continue
@@ -490,10 +496,6 @@ class JavaCodeGenerator(
     }
 
     fun generateSpringBootAnnotations(builder: TypeSpec.Builder) {
-      builder.addAnnotation(
-        ClassName.get("org.springframework.boot.context.properties", "ConstructorBinding")
-      )
-
       if (isModuleClass) {
         builder.addAnnotation(
           ClassName.get("org.springframework.boot.context.properties", "ConfigurationProperties")
