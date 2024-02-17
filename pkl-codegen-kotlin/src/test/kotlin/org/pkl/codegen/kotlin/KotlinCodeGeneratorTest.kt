@@ -132,7 +132,7 @@ class KotlinCodeGeneratorTest {
     private fun generateKotlinCode(
       pklCode: String,
       generateKdoc: Boolean = false,
-      generateSpringBootConfig: Boolean = false,
+      generateSpringBootConfig: String? = null,
       implementSerializable: Boolean = false
     ): String {
 
@@ -1157,7 +1157,7 @@ class KotlinCodeGeneratorTest {
   }
 
   @Test
-  fun `spring boot config`() {
+  fun `spring boot 2 config`() {
     val kotlinCode =
       generateKotlinCode(
         """
@@ -1170,7 +1170,7 @@ class KotlinCodeGeneratorTest {
           urls: Listing<Uri>
         }
       """,
-        generateSpringBootConfig = true
+        generateSpringBootConfig = "2.7.0"
       )
 
     // not worthwhile to add spring & spring boot dependency just so that this test can compile
@@ -1201,6 +1201,55 @@ class KotlinCodeGeneratorTest {
     """,
       kotlinCode
     )
+
+    assertCompilesSuccessfully(kotlinCodeWithoutSpringAnnotations)
+  }
+
+  @Test
+  fun `spring boot 3 config`() {
+    val kotlinCode =
+      generateKotlinCode(
+        """
+        module my.mod
+
+        server: Server
+
+        class Server {
+          port: Int
+          urls: Listing<Uri>
+        }
+      """,
+        generateSpringBootConfig = "3.0.0"
+      )
+
+    // not worthwhile to add spring & spring boot dependency just so that this test can compile
+    // their annotations
+    val kotlinCodeWithoutSpringAnnotations =
+      kotlinCode
+        .lines()
+        .filterNot { it.contains("ConstructorBinding") || it.contains("ConfigurationProperties") }
+        .joinToString("\n")
+
+    assertContains(
+      """
+      |@ConfigurationProperties
+      |data class Mod(
+      |  val server: Server
+    """,
+      kotlinCode
+    )
+
+    assertContains(
+      """
+      |  @ConfigurationProperties("server")
+      |  data class Server(
+      |    val port: Long,
+      |    val urls: List<URI>
+    """,
+      kotlinCode
+    )
+    
+    assertThat(kotlinCode).doesNotContain("@ConstructorBinding")
 
     assertCompilesSuccessfully(kotlinCodeWithoutSpringAnnotations)
   }

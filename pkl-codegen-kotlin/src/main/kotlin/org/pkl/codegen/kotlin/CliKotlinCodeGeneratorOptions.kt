@@ -32,8 +32,8 @@ data class CliKotlinCodeGeneratorOptions(
   /** Whether to generate Kdoc based on doc comments for Pkl modules, classes, and properties. */
   val generateKdoc: Boolean = false,
 
-  /** Whether to generate config classes for use with Spring Boot. */
-  val generateSpringBootConfig: Boolean = false,
+  /** Whether to generate config classes for use with Spring Boot. Specify Spring Boot target version. */
+  val generateSpringBootConfig: String? = null,
 
   /** Whether to make generated classes implement [java.io.Serializable] */
   val implementSerializable: Boolean = false

@@ -30,8 +30,8 @@ data class KotlinCodegenOptions(
   /** Whether to generate KDoc based on doc comments for Pkl modules, classes, and properties. */
   val generateKdoc: Boolean = false,
 
-  /** Whether to generate config classes for use with Spring Boot. */
-  val generateSpringBootConfig: Boolean = false,
+  /** Whether to generate config classes for use with Spring Boot. Specifies Spring Boot target version. */
+  val generateSpringBootConfig: String? = null,
 
   /** Whether to make generated classes implement [java.io.Serializable] */
   val implementSerializable: Boolean = false
@@ -397,9 +397,18 @@ class KotlinCodeGenerator(
     }
 
     fun generateSpringBootAnnotations(builder: TypeSpec.Builder) {
-      builder.addAnnotation(
-        ClassName("org.springframework.boot.context.properties", "ConstructorBinding")
-      )
+      if (options.generateSpringBootConfig == null) {
+        return
+      }
+
+      val springBootVersion = Version.parse(options.generateSpringBootConfig)
+
+      // From spring boot version 2.2.0 to 3.0.0. Not required as of 3.0.0
+      if (springBootVersion.major == 2 && springBootVersion.minor >= 2) {
+        builder.addAnnotation(
+          ClassName("org.springframework.boot.context.properties", "ConstructorBinding")
+        )
+      }
 
       if (isModuleClass) {
         builder.addAnnotation(
@@ -439,10 +448,8 @@ class KotlinCodeGenerator(
 
     fun generateRegularClass(): TypeSpec.Builder {
       val builder = TypeSpec.classBuilder(kotlinPoetClassName)
-
-      if (options.generateSpringBootConfig) {
-        generateSpringBootAnnotations(builder)
-      }
+      
+      generateSpringBootAnnotations(builder)
 
       builder.primaryConstructor(generateConstructor())
 
@@ -481,10 +488,8 @@ class KotlinCodeGenerator(
 
     fun generateDataClass(): TypeSpec.Builder {
       val builder = TypeSpec.classBuilder(kotlinPoetClassName).addModifiers(KModifier.DATA)
-
-      if (options.generateSpringBootConfig) {
-        generateSpringBootAnnotations(builder)
-      }
+      
+      generateSpringBootAnnotations(builder)
 
       builder.primaryConstructor(generateConstructor())
 

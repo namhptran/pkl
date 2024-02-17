@@ -67,12 +67,11 @@ class PklKotlinCodegenCommand :
       )
       .flag()
 
-  private val generateSpringboot: Boolean by
+  private val generateSpringboot: String? by
     option(
         names = arrayOf("--generate-spring-boot"),
-        help = "Whether to generate config classes for use with Spring boot."
+        help = "Whether to generate config classes for use with Spring Boot. Specify Spring Boot target version."
       )
-      .flag()
 
   private val implementSerializable: Boolean by
     option(
