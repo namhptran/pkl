@@ -76,12 +76,11 @@ class PklJavaCodegenCommand :
       )
       .flag()
 
-  private val generateSpringboot: Boolean by
+  private val generateSpringboot: String? by
     option(
         names = arrayOf("--generate-spring-boot"),
-        help = "Whether to generate config classes for use with Spring boot."
+        help = "Whether to generate config classes for use with Spring boot. Specifies Spring Boot target version."
       )
-      .flag()
 
   private val paramsAnnotation: String? by
     option(

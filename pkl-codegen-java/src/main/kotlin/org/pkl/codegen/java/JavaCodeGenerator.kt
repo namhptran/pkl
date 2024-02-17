@@ -52,8 +52,8 @@ data class JavaCodegenOptions(
   /** Whether to generate Javadoc based on doc comments for Pkl modules, classes, and properties. */
   val generateJavadoc: Boolean = false,
 
-  /** Whether to generate config classes for use with Spring Boot. */
-  val generateSpringBootConfig: Boolean = false,
+  /** Whether to generate config classes for use with Spring Boot.  Specifies Spring Boot target version. */
+  val generateSpringBootConfig: String? = null,
 
   /**
    * Fully qualified name of the annotation to use on constructor parameters. If this options is not
@@ -490,9 +490,18 @@ class JavaCodeGenerator(
     }
 
     fun generateSpringBootAnnotations(builder: TypeSpec.Builder) {
-      builder.addAnnotation(
-        ClassName.get("org.springframework.boot.context.properties", "ConstructorBinding")
-      )
+      if (codegenOptions.generateSpringBootConfig == null) {
+        return
+      }
+      
+      val springBootVersion = Version.parse(codegenOptions.generateSpringBootConfig)
+      
+      // From spring boot version 2.2.0 to 3.0.0. Not required as of 3.0.0
+      if (springBootVersion.major == 2 && springBootVersion.minor >= 2) {
+        builder.addAnnotation(
+          ClassName.get("org.springframework.boot.context.properties", "ConstructorBinding")
+        )
+      }
 
       if (isModuleClass) {
         builder.addAnnotation(
@@ -565,10 +574,8 @@ class JavaCodeGenerator(
       } else if (!pClass.isOpen) {
         builder.addModifiers(Modifier.FINAL)
       }
-
-      if (codegenOptions.generateSpringBootConfig) {
-        generateSpringBootAnnotations(builder)
-      }
+      
+      generateSpringBootAnnotations(builder)
 
       builder.addMethod(generateConstructor())
 

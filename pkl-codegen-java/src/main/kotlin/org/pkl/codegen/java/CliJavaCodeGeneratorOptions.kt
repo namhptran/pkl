@@ -38,8 +38,8 @@ data class CliJavaCodeGeneratorOptions(
   /** Whether to generate Javadoc based on doc comments for Pkl modules, classes, and properties. */
   val generateJavadoc: Boolean = false,
 
-  /** Whether to generate config classes for use with Spring Boot. */
-  val generateSpringBootConfig: Boolean = false,
+  /** Whether to generate config classes for use with Spring Boot. Specifies Spring Boot target version. */
+  val generateSpringBootConfig: String? = null,
 
   /**
    * Fully qualified name of the annotation to use on constructor parameters. If this options is not

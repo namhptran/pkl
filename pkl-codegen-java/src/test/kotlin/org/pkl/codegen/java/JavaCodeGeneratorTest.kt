@@ -99,7 +99,7 @@ class JavaCodeGeneratorTest {
       pklCode: String,
       generateGetters: Boolean = false,
       generateJavadoc: Boolean = false,
-      generateSpringBootConfig: Boolean = false,
+      generateSpringBootConfig: String? = null,
       nonNullAnnotation: String? = null,
       implementSerializable: Boolean = false
     ): String {
@@ -1361,7 +1361,7 @@ class JavaCodeGeneratorTest {
   }
 
   @Test
-  fun `spring boot config`() {
+  fun `spring boot 2 config`() {
     val javaCode =
       generateJavaCode(
         """
@@ -1374,7 +1374,7 @@ class JavaCodeGeneratorTest {
           urls: Listing<Uri>
         }
       """,
-        generateSpringBootConfig = true
+        generateSpringBootConfig = "2.7.0"
       )
 
     // not worthwhile to add spring & spring boot dependency just so that this test can compile
@@ -1415,6 +1415,65 @@ class JavaCodeGeneratorTest {
     """,
       javaCode
     )
+
+    assertCompilesSuccessfully(javaCodeWithoutSpringAnnotations)
+  }
+
+  @Test
+  fun `spring boot 3 config`() {
+    val javaCode =
+      generateJavaCode(
+        """
+        module my.mod
+
+        server: Server
+
+        class Server {
+          port: Int
+          urls: Listing<Uri>
+        }
+      """,
+        generateSpringBootConfig = "3.0.0"
+      )
+
+    // not worthwhile to add spring & spring boot dependency just so that this test can compile
+    // their annotations
+    val javaCodeWithoutSpringAnnotations =
+      javaCode
+        .lines()
+        .filterNot { it.contains("ConstructorBinding") || it.contains("ConfigurationProperties") }
+        .joinToString("\n")
+
+    assertContains(
+      """
+      |@ConfigurationProperties
+      |public final class Mod {
+    """,
+      javaCode
+    )
+
+    assertContains("""
+      |  public final @NonNull Server server;
+    """, javaCode)
+
+    assertContains(
+      """
+      |  @ConfigurationProperties("server")
+      |  public static final class Server {
+    """,
+      javaCode
+    )
+
+    assertContains(
+      """
+      |    public final long port;
+      |
+      |    public final @NonNull List<@NonNull URI> urls;
+    """,
+      javaCode
+    )
+    
+    assertThat(javaCode).doesNotContain("@ConstructorBinding")
 
     assertCompilesSuccessfully(javaCodeWithoutSpringAnnotations)
   }
